@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  # 1. 관계형 DB (사용자 정보, 기본 식품 정보 저장)
+  mysql:
+    image: mysql:8.0 # 가장 안정적인 8.0 버전 사용
+    container_name: food_mysql_db
+    ports:
+      - "3306:3306" # MySQL 기본 포트
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword123 # 루트 관리자 비밀번호 (원하는 대로 수정!)
+      - MYSQL_DATABASE=food_project_db # 도커가 켜질 때 이 이름으로 빈 DB를 하나 자동 생성해 줌
+    volumes:
+      - ./mysql_data:/var/lib/mysql # 도커를 꺼도 회원 정보가 날아가지 않게 저장
+
+  # 2. 지식 그래프 DB (질환, 알레르기 규칙 및 관계 저장)
+  neo4j:
+    image: neo4j:latest
+    container_name: food_graph_db
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/password123
+    volumes:
+      - ./neo4j_data:/data
+
+  # 3. 벡터 DB (의학 논문, 가이드라인 등 텍스트 유사도 검색용)
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: food_vector_db
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./chroma_data:/chroma/chroma
